@@ -1,13 +1,12 @@
-import loguru
 import config
 import math
 import mmap
 from loguru import logger
 import sys
 import csv
-from arm import get_arm_type, from_hex_to_arm, from_hex_to_double, from_hex_to_float, from_hex_to_string, get_spreadsheet_type
+from arm import get_spreadsheet_type
 logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
-logger.add("file_{time}.log", level="INFO")
+logger.add("file_{time}.log", level="DEBUG")
 #logger.remove()
 #logger.add(sys.stdout, level="INFO")
 logger.debug(f"Trying to load {config.HBK_NAME}")
@@ -69,9 +68,11 @@ with open("tablichka.csv", "w") as csvfile:
                 if array_count > 1:
                     logger.info(f"{name} is an array of {array_count} values")
                     for j in range(array_count):
-                        glib.seek(int(address, 16) + 8*j)
+                        array_address = int(address, 16) + 8*j
+                        glib.seek(array_address)
                         read_value = glib.read(length)
-                        logger.debug(f"{int(address, 16) + 8*j}, {read_value.hex().upper()=}")
+                        array_address = hex(array_address).upper().replace("X", "0")
+                        logger.debug(f"{array_address=}, {read_value.hex().upper()=}")
                         arm_type = get_spreadsheet_type(read_value)
                         # arm_type = "HEX VALUE"
                         # if length == 8:
@@ -87,8 +88,8 @@ with open("tablichka.csv", "w") as csvfile:
                         #         arm_type = "FLT"
                         #     else:
                         #         arm_type = get_arm_type(extracted_value)
-                        logger.info(f"#{j}, {name=}, {address=}, {length=}, {read_value.hex().upper()=}, {arm_type=}")
-                        filewriter.writerow([i+1, f"{name}[{j}]", arm_type, address, read_value.hex().upper()])
+                        logger.info(f"#{j}, {name=}, {array_address=}, {length=}, {read_value.hex().upper()=}, {arm_type=}")
+                        filewriter.writerow([i+1, f"{name}[{j}]", arm_type, array_address, read_value.hex().upper()])
                 else:     
                     glib.seek(int(address, 16))
                     default_value = glib.read(length)
