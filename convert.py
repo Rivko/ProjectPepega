@@ -7,9 +7,10 @@ import csv
 from arm import get_spreadsheet_type
 
 logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
-logger.add("file_{time}.log", level="DEBUG")
+logger.add("convert_{time}.log", level="DEBUG")
 # logger.remove()
 # logger.add(sys.stdout, level="INFO")
+logger.debug(f"Config: {config.HBK_NAME=}, {config.LIB_TO_EXTRACT=}")
 logger.info(f"Trying to load {config.HBK_NAME}")
 
 
@@ -45,31 +46,21 @@ try:
     with open(config.HBK_NAME, "rb") as hbk_file:
         hbk = mmap.mmap(hbk_file.fileno(), 0, access=mmap.ACCESS_READ)
         hbk_size = math.floor(hbk.size() / 656)
-        logger.info(
-            f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses = {hbk_size-1}"
-        )
 except FileNotFoundError as e:
     logger.error(e)
     exit()
 
-tablichka_rows = [
-    "ID",
-    "Name",
-    "Type",
-    "Address",
-    "Value hex original",
-    "Disassemble",
-    "Extracted Value",
-    "Value override",
-    "Value Override Converted to HEX",
-]
+logger.success(
+    f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses = {hbk_size-1}"
+)
+
 with open("tablichka.csv", "w") as csvfile:
     filewriter = csv.writer(
         csvfile, delimiter="\t", quotechar="|", quoting=csv.QUOTE_MINIMAL
     )
-    filewriter.writerow(tablichka_rows)
+    filewriter.writerow(config.COLUMN_NAMES)
     try:
-        with open(config.LIB_NAME, "r+b") as f:
+        with open(config.LIB_TO_EXTRACT, "r+b") as f:
             glib = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_WRITE)
             start_offset = 448  # первый букмарк лежит через 448 байт от начала файла
             for i in range(hbk_size - 1):
