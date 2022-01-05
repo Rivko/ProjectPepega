@@ -10,7 +10,7 @@ logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
 logger.add("file_{time}.log", level="DEBUG")
 # logger.remove()
 # logger.add(sys.stdout, level="INFO")
-logger.debug(f"Trying to load {config.HBK_NAME}")
+logger.info(f"Trying to load {config.HBK_NAME}")
 
 
 def read_hbk_by_offset(offset: int) -> str:
@@ -26,14 +26,14 @@ def read_hbk_by_offset(offset: int) -> str:
             # 448
             # 208
             value = ""
-            # logger.debug(f"Address = {offset}")
+            logger.debug(f"Address = {offset}, {hex(offset)=}")
             hbk.seek(offset)
             while True:
                 t = hbk.read(1)
                 if t == b"\x00":
                     break
                 value = value + t.decode("utf-8")
-            # logger.debug(f"Extracted value = {value}")
+            logger.debug(f"Extracted value = {value}")
             return value
 
     except ValueError as e:
@@ -95,7 +95,7 @@ with open("tablichka.csv", "w") as csvfile:
                         )  # начальный адрес + длина умноженная на номер в массиве = адрес значения в массиве
                         glib.seek(array_address)
                         read_value = glib.read(length)
-                        array_address = hex(array_address).upper().replace("X", "0") #
+                        array_address = hex(array_address).upper().replace("X", "0")  #
                         logger.debug(f"{array_address=}, {read_value.hex().upper()=}")
                         arm_type = get_spreadsheet_type(read_value)
                         # arm_type = "HEX VALUE"
@@ -118,7 +118,7 @@ with open("tablichka.csv", "w") as csvfile:
                         filewriter.writerow(
                             [
                                 i + 1,
-                                f"{name}[{j}]",
+                                f"{name} [{j}]",
                                 arm_type,
                                 array_address,
                                 read_value.hex().upper(),

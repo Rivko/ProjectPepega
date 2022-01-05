@@ -5,7 +5,7 @@ from capstone import Cs, CS_ARCH_ARM64, CS_MODE_ARM
 def from_hex_to_arm(hex_bytes: bytes) -> str:
     """
     :param hex_bytes: hex bytes to convert to ARM64
-    :return: ARM64 mnemonic + op
+    :return: ARM64 mnemonic
     """
     md = Cs(CS_ARCH_ARM64, CS_MODE_ARM)
     md.detail = True
