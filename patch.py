@@ -1,5 +1,4 @@
 from io import StringIO
-import logging
 import pandas as pd
 from loguru import logger
 import sys
@@ -10,7 +9,7 @@ from datetime import datetime
 from shutil import copyfile
 
 now = datetime.now()
-dt_string = now.strftime("[%d.%m.%Y %H:%M:%S]")
+dt_string = now.strftime("[%d.%m.%Y %H.%M.%S]")
 logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
 logger.add("patch.log", level="DEBUG", rotation="1 MB")
 logger.debug(
@@ -74,7 +73,7 @@ except Exception as e:
 
 try:
     with open("patched/" + NEW_LIB_NAME + ".so", "r+b") as lib_file:
-        logger.debug(f"Trying to open {NEW_LIB_NAME} in /patched")
+        logger.debug(f"Trying to open patched/{NEW_LIB_NAME}")
         lib = mmap.mmap(lib_file.fileno(), 0, access=mmap.ACCESS_WRITE)
 except FileNotFoundError as e:
     logger.error(e)
