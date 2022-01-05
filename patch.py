@@ -10,8 +10,13 @@ from os import makedirs, path
 
 now = datetime.now()
 dt_string = now.strftime("[%d.%m.%Y %H.%M.%S]")
-#logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
-logger.add("patch.log", level="DEBUG", rotation="1 MB", format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
+# logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
+logger.add(
+    "patch.log",
+    level="DEBUG",
+    rotation="1 MB",
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
+)
 logger.debug(
     f"Config: {config.SPREADSHEET_URL=}, {config.SHEET_NAME=}, {config.LIB_TO_PATCH=}"
 )

@@ -5,8 +5,13 @@ from loguru import logger
 import csv
 from arm import get_spreadsheet_type
 
-#logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
-logger.add("convert.log", level="DEBUG", rotation="1 MB", format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
+# logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
+logger.add(
+    "convert.log",
+    level="DEBUG",
+    rotation="1 MB",
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
+)
 # logger.remove()
 # logger.add(sys.stdout, level="INFO")
 logger.debug(f"Config: {config.HBK_NAME=}, {config.LIB_TO_EXTRACT=}")
