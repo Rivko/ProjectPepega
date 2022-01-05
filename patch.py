@@ -1,8 +1,6 @@
 from io import StringIO
-from numpy import dtype
 import pandas as pd
 from loguru import logger
-import sys
 import config
 import spreadsheet
 import mmap
@@ -12,8 +10,8 @@ from os import makedirs, path
 
 now = datetime.now()
 dt_string = now.strftime("[%d.%m.%Y %H.%M.%S]")
-logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
-logger.add("patch.log", level="DEBUG", rotation="1 MB")
+#logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
+logger.add("patch.log", level="DEBUG", rotation="1 MB", format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
 logger.debug(
     f"Config: {config.SPREADSHEET_URL=}, {config.SHEET_NAME=}, {config.LIB_TO_PATCH=}"
 )
@@ -21,7 +19,7 @@ try:
     sheet_id = spreadsheet.extract_id_from_url(config.SPREADSHEET_URL)
     full_url = spreadsheet.get_full_url(sheet_id, config.SHEET_NAME)
 except IndexError:
-    logger.error("Enter a valid spreadsheet url in config file.")
+    logger.error("Enter a valid spreadsheet url in config.py")
     exit()
 
 logger.debug(f"Extracted {sheet_id=}, {full_url=}")
@@ -131,3 +129,4 @@ changelog.write(
 )
 with open("patched/" + NEW_LIB_NAME + ".txt", "w", encoding="utf-8") as f:
     print(changelog.getvalue(), file=f)
+logger.success("All finished :)")
