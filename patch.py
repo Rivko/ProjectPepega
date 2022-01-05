@@ -27,7 +27,6 @@ except ValueError as e:
     )
     exit()
 logger.success(f"Parsed {full_url}, num of values = {len(tablichka.index)}")
-print(tablichka.head(5))
 warning_columns = [
     "Name",
     "Type",
@@ -35,11 +34,13 @@ warning_columns = [
     "Disassemble",
     "Extracted Value",
 ]
-empty_important_columns = tablichka[warning_columns].isnull().values.any()
-if empty_important_columns:
+empty_warning_columns = tablichka[warning_columns].isnull().values.any()
+if empty_warning_columns:
     logger.warning(
         f"Found empty spreadsheet values in {warning_columns} columns. Script can still work but you should probably fill these."
     )
+    logger.info(f"Empty names will be replaced with UNKNOWN")
+    tablichka["Name"] = tablichka["Name"].fillna("UNKNOWN")
 
 error_columns = ["Address", "Value Override Converted to HEX"]
 empty_error_columns = tablichka[error_columns].isnull().values.sum()
@@ -49,6 +50,7 @@ if empty_error_columns:
         row
         for row in tablichka[tablichka["Value Override Converted to HEX"].isna()].index
     ]
+    empty_rows.sort()
     logger.error(
         f"Found {empty_error_columns} empty spreadsheet value(s) with ID {empty_rows} in {error_columns} columns. Exiting..."
     )
