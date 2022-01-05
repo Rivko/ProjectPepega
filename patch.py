@@ -1,4 +1,5 @@
 from io import StringIO
+from numpy import dtype
 import pandas as pd
 from loguru import logger
 import sys
@@ -7,6 +8,7 @@ import spreadsheet
 import mmap
 from datetime import datetime
 from shutil import copyfile
+from os import makedirs, path
 
 now = datetime.now()
 dt_string = now.strftime("[%d.%m.%Y %H.%M.%S]")
@@ -25,7 +27,12 @@ except IndexError:
 logger.debug(f"Extracted {sheet_id=}, {full_url=}")
 try:
     logger.info(f"Trying to access {full_url}")
-    tablichka = pd.read_csv(full_url, index_col=0, usecols=config.COLUMN_NAMES)
+    tablichka = pd.read_csv(
+        full_url,
+        index_col=0,
+        usecols=config.COLUMN_NAMES,
+        dtype={"Name": "str", "Value override": "str", "Extracted Value": "str"},
+    )
 except ValueError as e:
     logger.error(e)
     logger.error(
@@ -57,15 +64,33 @@ if empty_error_columns:
         empty_rows += [
             row for row in tablichka[tablichka[column].isna()].index
         ]  # список индексов с пустыми строками
-    empty_rows.sort()
+    empty_rows = sorted(set(empty_rows))
     logger.error(
         f"Found {empty_error_columns} empty spreadsheet value(s) with ID {empty_rows} in {error_columns} columns. Exiting..."
+    )
+    exit()
+
+changed_values = tablichka.loc[
+    tablichka["Value Override Converted to HEX"] != tablichka["Value hex original"]
+]  # выбираются значения где дефолт хекс и новый хекс не совпадают
+values_to_patch = list(
+    zip(changed_values["Address"], changed_values["Value Override Converted to HEX"])
+)
+
+
+if (
+    changed_values["Value Override Converted to HEX"].str.contains("Loading").any()
+    or changed_values["Value Override Converted to HEX"].str.contains("NAME").any()
+):
+    logger.error(
+        "Google Spreadsheet is still processing some values. Please wait a minute and try running the script again."
     )
     exit()
 
 try:
     NEW_LIB_NAME = config.LIB_TO_PATCH.split(".so")[0] + "_" + dt_string
     logger.debug(f"Copying {config.LIB_TO_PATCH} to /patched/{NEW_LIB_NAME}.so")
+    makedirs(path.dirname("patched/"), exist_ok=True)
     copyfile(config.LIB_TO_PATCH, "patched/" + NEW_LIB_NAME + ".so")
 except Exception as e:
     logger.error(e)
@@ -80,20 +105,12 @@ except FileNotFoundError as e:
     exit()
 
 logger.success(f"Loaded lib file {NEW_LIB_NAME}.so")
-changed_values = tablichka.loc[
-    tablichka["Value Override Converted to HEX"] != tablichka["Value hex original"]
-]  # выбираются значения где дефолт хекс и новый хекс не совпадают
-values_to_patch = list(
-    zip(changed_values["Address"], changed_values["Value Override Converted to HEX"])
-)
-if changed_values["Value Override Converted to HEX"].str.contains("Loading").any():
-    logger.error(
-        "Google Spreadsheet is still processing some values. Please wait a minute and try running the script again."
-    )
-    exit()
 
 logger.info(f"Patching {len(values_to_patch)} values")
 for value in values_to_patch:
+    if str(value[0]) == "nan" or str(value[1]) == "nan":
+        logger.error(f"Found an empty address or value. This should not happen.")
+        continue
     logger.debug(f"Patching address = {value[0]}, value = {value[1]}")
     try:
         lib.seek(int(value[0], 16), 0)

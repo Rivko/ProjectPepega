@@ -54,7 +54,7 @@ logger.success(
     f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses = {hbk_size-1}"
 )
 
-with open("tablichka.csv", "w") as csvfile:
+with open(config.HBK_NAME + ".csv", "w") as csvfile:
     filewriter = csv.writer(
         csvfile, delimiter="\t", quotechar="|", quoting=csv.QUOTE_MINIMAL
     )
