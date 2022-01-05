@@ -1,6 +1,7 @@
 import re, struct
 from capstone import Cs, CS_ARCH_ARM64, CS_MODE_ARM
 
+
 def from_hex_to_arm(hex_bytes: bytes) -> str:
     """
     :param hex_bytes: hex bytes to convert to ARM64
@@ -42,7 +43,7 @@ def from_hex_to_double(hex_string: str) -> str:
     :param hex_string: hex string to convert to double
     :return: double
     """
-    return struct.unpack('<d', bytes.fromhex(hex_string))[0]
+    return struct.unpack("<d", bytes.fromhex(hex_string))[0]
 
 
 def from_hex_to_float(hex_string: str) -> str:
@@ -50,7 +51,8 @@ def from_hex_to_float(hex_string: str) -> str:
     :param hex_string: hex string to convert to float
     :return: float
     """
-    return struct.unpack('<f', bytes.fromhex(hex_string))[0]
+    return struct.unpack("<f", bytes.fromhex(hex_string))[0]
+
 
 def from_hex_to_string(hex_string: bytes) -> str:
     """
@@ -63,14 +65,14 @@ def from_hex_to_string(hex_string: bytes) -> str:
         decoded_hex = "[Error while decoding]"
     return decoded_hex
 
+
 def get_spreadsheet_type(hex_string: str) -> str:
-    arm_type = "HEX VALUE"
+    arm_type = "HEXSTRING"
     length = len(hex_string)
     if length == 8:
         extracted_value = from_hex_to_double(hex_string.hex())
         arm_type = "DBL"
     elif length > 8:
-        arm_type = "HEX STRING"
         extracted_value = from_hex_to_string(hex_string)
     else:
         extracted_value = from_hex_to_arm(hex_string)
