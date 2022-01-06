@@ -4,3 +4,7 @@ include/
 lib/
 lib64/
 env/
+*.hbk
+*.so
+*.csv
+*.log
