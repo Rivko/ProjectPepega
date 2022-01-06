@@ -1,8 +1,10 @@
-import config
+import csv
 import math
 import mmap
+
 from loguru import logger
-import csv
+
+import config
 from arm import get_spreadsheet_type
 
 # logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
@@ -12,6 +14,8 @@ logger.add(
     rotation="1 MB",
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
 )
+
+
 # logger.remove()
 # logger.add(sys.stdout, level="INFO")
 
@@ -24,15 +28,15 @@ def read_hbk_by_offset(offset: int) -> str:
     :rtype: str
     """
     try:
-        with open(config.HBK_NAME, "rb") as f:
-            hbk = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+        with open(config.HBK_NAME, "rb") as hbk_f:
+            hbk_mmap = mmap.mmap(hbk_f.fileno(), 0, access=mmap.ACCESS_READ)
             # 448
             # 208
             value = ""
             logger.debug(f"Address = {offset}, {hex(offset)=}")
-            hbk.seek(offset)
+            hbk_mmap.seek(offset)
             while True:
-                t = hbk.read(1)
+                t = hbk_mmap.read(1)
                 if t == b"\x00":
                     break
                 value = value + t.decode("utf-8")
@@ -57,7 +61,7 @@ if __name__ == "__main__":
         exit()
 
     logger.success(
-        f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses = {hbk_size-1}"
+        f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses = {hbk_size - 1}"
     )
 
     with open(config.HBK_NAME + ".csv", "w") as csvfile:
@@ -74,25 +78,25 @@ if __name__ == "__main__":
                 for i in range(hbk_size - 1):
                     name = read_hbk_by_offset(start_offset)
                     address_offset = (
-                        start_offset + 80
+                            start_offset + 80
                     )  # адрес лежит через 80 байт после имени
                     address = read_hbk_by_offset(address_offset)
                     length_offset = (
-                        start_offset + 208
+                            start_offset + 208
                     )  # размер лежит через 208 после имени
                     length = int(read_hbk_by_offset(length_offset), 16)
                     array_count_offset = (
-                        start_offset + 336
+                            start_offset + 336
                     )  # количество значений для массивов лежит через 336 байт после имени
                     array_count = int(read_hbk_by_offset(array_count_offset), 16)
                     start_offset = (
-                        start_offset + 656
+                            start_offset + 656
                     )  # дальше букмарки идут через каждые 656 байт
                     if array_count > 1:
                         logger.info(f"{name} is an array of {array_count} values")
                         for j in range(array_count):
                             array_address = (
-                                int(address, 16) + length * j
+                                    int(address, 16) + length * j
                             )  # начальный адрес + длина умноженная на номер в массиве = адрес значения в массиве
                             glib.seek(array_address)
                             read_value = glib.read(length)

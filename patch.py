@@ -1,13 +1,14 @@
-from io import StringIO
-import pandas as pd
-from loguru import logger
-import config
-import spreadsheet
 import mmap
 from datetime import datetime
-from shutil import copyfile
+from io import StringIO
 from os import makedirs, path
+from shutil import copyfile
 
+import pandas as pd
+from loguru import logger
+
+import config
+import spreadsheet
 
 # logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
 logger.add(
@@ -78,7 +79,7 @@ if __name__ == "__main__":
 
     changed_values = tablichka.loc[
         tablichka["Value Override Converted to HEX"] != tablichka["Value hex original"]
-    ]  # выбираются значения где дефолт хекс и новый хекс не совпадают
+        ]  # выбираются значения где дефолт хекс и новый хекс не совпадают
     values_to_patch = list(
         zip(
             changed_values["Address"], changed_values["Value Override Converted to HEX"]
@@ -86,8 +87,8 @@ if __name__ == "__main__":
     )
 
     if (
-        changed_values["Value Override Converted to HEX"].str.contains("Loading").any()
-        or changed_values["Value Override Converted to HEX"].str.contains("NAME").any()
+            changed_values["Value Override Converted to HEX"].str.contains("Loading").any()
+            or changed_values["Value Override Converted to HEX"].str.contains("NAME").any()
     ):
         logger.error(
             "Google Spreadsheet is still processing some values. Please wait a minute and try running the script again."

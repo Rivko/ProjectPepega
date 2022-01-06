@@ -1,4 +1,6 @@
-import re, struct
+import re
+import struct
+
 from capstone import Cs, CS_ARCH_ARM64, CS_MODE_ARM
 
 
@@ -61,12 +63,12 @@ def from_hex_to_string(hex_string: bytes) -> str:
     """
     try:
         decoded_hex = str(hex_string.decode("utf-8")).replace("\x00", "")
-    except:
+    except Exception as e:
         decoded_hex = "[Error while decoding]"
     return decoded_hex
 
 
-def get_spreadsheet_type(hex_string: str) -> str:
+def get_spreadsheet_type(hex_string: bytes) -> str:
     arm_type = "HEXSTRING"
     length = len(hex_string)
     if length == 8:
