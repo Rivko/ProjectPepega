@@ -74,7 +74,7 @@ if __name__ == "__main__":
         logger.error(
             f"Found {empty_error_columns} empty spreadsheet value(s) with ID {empty_rows} in {error_columns} columns. Exiting..."
         )
-        # exit()
+        exit()
 
     changed_values = tablichka.loc[
         tablichka["Value Override Converted to HEX"] != tablichka["Value hex original"]
