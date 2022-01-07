@@ -12,7 +12,9 @@ logger.add(
     "convert.log",
     level="DEBUG",
     rotation="1 MB",
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
+    format=(
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
+    ),
 )
 
 
@@ -61,7 +63,8 @@ if __name__ == "__main__":
         exit()
 
     logger.success(
-        f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses = {hbk_size - 1}"
+        f"Loaded {config.HBK_NAME}, file size = {hbk.size()} bytes, addresses ="
+        f" {hbk_size - 1}"
     )
 
     with open(config.HBK_NAME + ".csv", "w") as csvfile:
@@ -78,25 +81,25 @@ if __name__ == "__main__":
                 for i in range(hbk_size - 1):
                     name = read_hbk_by_offset(start_offset)
                     address_offset = (
-                            start_offset + 80
+                        start_offset + 80
                     )  # адрес лежит через 80 байт после имени
                     address = read_hbk_by_offset(address_offset)
                     length_offset = (
-                            start_offset + 208
+                        start_offset + 208
                     )  # размер лежит через 208 после имени
                     length = int(read_hbk_by_offset(length_offset), 16)
                     array_count_offset = (
-                            start_offset + 336
+                        start_offset + 336
                     )  # количество значений для массивов лежит через 336 байт после имени
                     array_count = int(read_hbk_by_offset(array_count_offset), 16)
                     start_offset = (
-                            start_offset + 656
+                        start_offset + 656
                     )  # дальше букмарки идут через каждые 656 байт
                     if array_count > 1:
                         logger.info(f"{name} is an array of {array_count} values")
                         for j in range(array_count):
                             array_address = (
-                                    int(address, 16) + length * j
+                                int(address, 16) + length * j
                             )  # начальный адрес + длина умноженная на номер в массиве = адрес значения в массиве
                             glib.seek(array_address)
                             read_value = glib.read(length)
@@ -122,7 +125,8 @@ if __name__ == "__main__":
                             #     else:
                             #         arm_type = get_arm_type(extracted_value)
                             logger.info(
-                                f"#{j}, {name=}, {array_address=}, {length=}, {read_value.hex().upper()=}, {arm_type=}"
+                                f"#{j}, {name=}, {array_address=}, {length=},"
+                                f" {read_value.hex().upper()=}, {arm_type=}"
                             )
                             filewriter.writerow(
                                 [
@@ -138,7 +142,8 @@ if __name__ == "__main__":
                         default_value = glib.read(length)
                         arm_type = get_spreadsheet_type(default_value)
                         logger.info(
-                            f"#{i}, {name=}, {address=}, {length=}, {default_value.hex().upper()=}, {arm_type=}"
+                            f"#{i}, {name=}, {address=}, {length=},"
+                            f" {default_value.hex().upper()=}, {arm_type=}"
                         )
                         filewriter.writerow(
                             [

@@ -15,14 +15,17 @@ logger.add(
     "patch.log",
     level="DEBUG",
     rotation="1 MB",
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
+    format=(
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
+    ),
 )
 
 if __name__ == "__main__":
     now = datetime.now()
     dt_string = now.strftime("[%d.%m.%Y %H.%M.%S]")
     logger.debug(
-        f"Config: {config.SPREADSHEET_URL=}, {config.SHEET_NAME=}, {config.LIB_TO_PATCH=}"
+        f"Config: {config.SPREADSHEET_URL=}, {config.SHEET_NAME=},"
+        f" {config.LIB_TO_PATCH=}"
     )
     try:
         sheet_id = spreadsheet.extract_id_from_url(config.SPREADSHEET_URL)
@@ -43,7 +46,8 @@ if __name__ == "__main__":
     except ValueError as e:
         logger.error(e)
         logger.error(
-            "Couldn't parse the spreadsheet. Make sure that url and column names are correct and spreadsheet is open to public."
+            "Couldn't parse the spreadsheet. Make sure that url and column names are"
+            " correct and spreadsheet is open to public."
         )
         exit()
     logger.success(
@@ -58,7 +62,8 @@ if __name__ == "__main__":
     empty_warning_columns = tablichka[warning_columns].isnull().values.any()
     if empty_warning_columns:
         logger.warning(
-            f"Found empty spreadsheet values in {warning_columns} columns. Script might still work but you should probably fill these."
+            f"Found empty spreadsheet values in {warning_columns} columns. Script might"
+            " still work but you should probably fill these."
         )
         logger.info(f"Empty names will be replaced with UNKNOWN")
         tablichka["Name"] = tablichka["Name"].fillna("UNKNOWN")
@@ -73,13 +78,14 @@ if __name__ == "__main__":
             ]  # список индексов с пустыми строками
         empty_rows = sorted(set(empty_rows))
         logger.error(
-            f"Found {empty_error_columns} empty spreadsheet value(s) with ID {empty_rows} in {error_columns} columns. Exiting..."
+            f"Found {empty_error_columns} empty spreadsheet value(s) with ID"
+            f" {empty_rows} in {error_columns} columns. Exiting..."
         )
         exit()
 
     changed_values = tablichka.loc[
         tablichka["Value Override Converted to HEX"] != tablichka["Value hex original"]
-        ]  # выбираются значения где дефолт хекс и новый хекс не совпадают
+    ]  # выбираются значения где дефолт хекс и новый хекс не совпадают
     values_to_patch = list(
         zip(
             changed_values["Address"], changed_values["Value Override Converted to HEX"]
@@ -87,11 +93,12 @@ if __name__ == "__main__":
     )
 
     if (
-            changed_values["Value Override Converted to HEX"].str.contains("Loading").any()
-            or changed_values["Value Override Converted to HEX"].str.contains("NAME").any()
+        changed_values["Value Override Converted to HEX"].str.contains("Loading").any()
+        or changed_values["Value Override Converted to HEX"].str.contains("NAME").any()
     ):
         logger.error(
-            "Google Spreadsheet is still processing some values. Please wait a minute and try running the script again."
+            "Google Spreadsheet is still processing some values. Please wait a minute"
+            " and try running the script again."
         )
         exit()
 
@@ -132,7 +139,8 @@ if __name__ == "__main__":
 
     changelog = StringIO()
     changelog.write(
-        f"This is an auto-generated changelog by PepegaPatcher\nPatched on {dt_string}\n"
+        "This is an auto-generated changelog by PepegaPatcher\nPatched on"
+        f" {dt_string}\n"
     )
     changelog.write(
         changed_values.to_string(

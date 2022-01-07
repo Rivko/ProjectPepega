@@ -8,11 +8,12 @@ env/
 *.so
 *.csv
 *.log
-
+patched/*.txt
 # Byte-compiled / optimized / DLL files
-__pycache__/
+__pycache__/*.pyc
 *.py[cod]
 *$py.class
+*.pyc
 
 # C extensions
 *.so
@@ -239,3 +240,4 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
+__pycache__/arm.cpython-310.pyc
