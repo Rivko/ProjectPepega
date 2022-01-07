@@ -18,3 +18,5 @@ COLUMN_NAMES = [
     "Value Override Converted to HEX",
     "Value Override Hex String",
 ]
+
+__VERSION__ = 0.1

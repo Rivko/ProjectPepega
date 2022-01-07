@@ -9,6 +9,7 @@ from loguru import logger
 
 import config
 import spreadsheet
+from updater import check_for_updates
 
 # logger.add(sys.stderr, colorize=True, format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}")
 logger.add(
@@ -108,7 +109,7 @@ if __name__ == "__main__":
         makedirs(path.dirname("patched/"), exist_ok=True)
         copyfile(config.LIB_TO_PATCH, "patched/" + NEW_LIB_NAME + ".so")
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
         exit()
 
     try:
@@ -116,7 +117,7 @@ if __name__ == "__main__":
             logger.debug(f"Trying to open patched/{NEW_LIB_NAME}")
             lib = mmap.mmap(lib_file.fileno(), 0, access=mmap.ACCESS_WRITE)
     except FileNotFoundError as e:
-        logger.error(e)
+        logger.exception(e)
         exit()
 
     logger.success(f"Loaded lib file {NEW_LIB_NAME}.so")
@@ -152,3 +153,9 @@ if __name__ == "__main__":
     with open("patched/" + NEW_LIB_NAME + ".txt", "w", encoding="utf-8") as f:
         print(changelog.getvalue(), file=f)
     logger.success("All finished :)")
+    github_updated = check_for_updates(config.__VERSION__)
+    if github_updated:
+        logger.success(
+            f"New update {github_updated} is available @"
+            " https://github.com/Rivko/ProjectPepega"
+        )

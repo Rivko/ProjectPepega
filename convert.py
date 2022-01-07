@@ -6,6 +6,7 @@ from loguru import logger
 
 import config
 from arm import get_spreadsheet_type
+from updater import check_for_updates
 
 # logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
 logger.add(
@@ -154,6 +155,13 @@ if __name__ == "__main__":
                                 default_value.hex().upper(),
                             ]
                         )
+                logger.success("All finished :)")
+                github_updated = check_for_updates(config.__VERSION__)
+                if github_updated:
+                    logger.success(
+                        f"New update {github_updated} is available @"
+                        " https://github.com/Rivko/ProjectPepega"
+                    )
         except FileNotFoundError as e:
-            logger.error(e)
+            logger.exception(e)
             exit()
