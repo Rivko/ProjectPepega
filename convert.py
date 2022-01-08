@@ -47,7 +47,7 @@ def read_hbk_by_offset(offset: int) -> str:
             return value
 
     except ValueError as e:
-        logger.error(e)
+        logger.exception(e)
         exit()
 
 
@@ -55,12 +55,13 @@ if __name__ == "__main__":
     logger.debug(f"Config: {config.HBK_NAME=}, {config.LIB_TO_EXTRACT=}")
     logger.info(f"Trying to load {config.HBK_NAME}")
 
+    # открывает указанный букмарк и считает его размер/количество адресов
     try:
         with open(config.HBK_NAME, "rb") as hbk_file:
             hbk = mmap.mmap(hbk_file.fileno(), 0, access=mmap.ACCESS_READ)
             hbk_size = math.floor(hbk.size() / 656)
     except FileNotFoundError as e:
-        logger.error(e)
+        logger.exception(e)
         exit()
 
     logger.success(
@@ -156,6 +157,8 @@ if __name__ == "__main__":
                             ]
                         )
                 logger.success("All finished :)")
+
+                # проверка если ли обнова на гитхабе
                 github_updated = check_for_updates(config.__VERSION__)
                 if github_updated:
                     logger.success(
