@@ -87,14 +87,23 @@ if __name__ == "__main__":
         )  # сортировка и удаление дубликатов индексов
         logger.error(
             f"Found {empty_error_columns} empty spreadsheet value(s) with ID"
-            f" {empty_rows} in {error_columns} columns. Exiting..."
+            f" {empty_rows} in {error_columns} columns. These rows will be ignored during patching."
         )
-        exit()
+        # exit()
 
     # выбираются значения где дефолт хекс и новый хекс не совпадают
     changed_values = tablichka.loc[
         tablichka["Value Override Converted to HEX"] != tablichka["Value hex original"]
     ]
+
+    # чистка записей у которых есть NaN значения
+    changed_values = changed_values[changed_values["Address"].notna()]
+    changed_values = changed_values[
+        changed_values["Value Override Converted to HEX"].notna()
+    ]
+    changed_values = changed_values[changed_values["Value hex original"].notna()]
+
+    # зипуем вместе оставшиеся адреса и значения
     values_to_patch = list(
         zip(
             changed_values["Address"], changed_values["Value Override Converted to HEX"]
@@ -138,7 +147,6 @@ if __name__ == "__main__":
     logger.info(f"Patching {len(values_to_patch)} values")
 
     # патчим все выбранные значения
-    # TODO: нормальная проверка/обработка NaN значений
     for value in values_to_patch:
         if str(value[0]) == "nan" or str(value[1]) == "nan":
             logger.critical(
