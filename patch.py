@@ -3,7 +3,7 @@ from datetime import datetime
 from io import StringIO
 from os import makedirs, path
 from shutil import copyfile
-
+from binascii import unhexlify
 import pandas as pd
 from loguru import logger
 
@@ -106,7 +106,9 @@ if __name__ == "__main__":
     # зипуем вместе оставшиеся адреса и значения
     values_to_patch = list(
         zip(
-            changed_values["Address"], changed_values["Value Override Converted to HEX"], changed_values['Value hex original']
+            changed_values["Address"],
+            changed_values["Value Override Converted to HEX"],
+            changed_values["Value hex original"],
         )
     )
 
@@ -154,13 +156,14 @@ if __name__ == "__main__":
             )
             continue
         if (str(value[0]).lower()) == "pattern":
-            logger.info(f"Found pattern {value=}")
+            logger.info(f"Patching pattern {value[2]} => {value[1]}")
             index = lib.find(bytes.fromhex(value[2]))
             while index != -1:
-                logger.debug(f"Patching pattern {value[2]} = {value[1]} at {hex(index).upper().replace('X', '0')}")
+                logger.debug(f"Found at {hex(index).upper().replace('X', '0')}")
                 lib.seek(index, 0)
                 lib.write(bytes.fromhex(value[1]))
                 index = lib.find(bytes.fromhex(value[2]))
+            lib.seek(0)
             continue
         logger.debug(f"Patching address = {value[0]}, value = {value[1]}")
         try:
@@ -176,6 +179,9 @@ if __name__ == "__main__":
         "This is an auto-generated changelog by PepegaPatcher\nPatched on"
         f" {dt_string}\n"
     )
+
+    # удаляет паттерны из ченджлога
+    changed_values = changed_values[~changed_values["Address"].str.contains("PATTERN")]
 
     # копируем весь датафрейм в файл ченджлога
     changelog.write(
