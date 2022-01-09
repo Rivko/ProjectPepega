@@ -3,7 +3,6 @@ from datetime import datetime
 from io import StringIO
 from os import makedirs, path
 from shutil import copyfile
-from binascii import unhexlify
 import pandas as pd
 from loguru import logger
 
@@ -150,11 +149,15 @@ if __name__ == "__main__":
 
     # патчим все выбранные значения
     for value in values_to_patch:
+
+        # если адрес или значения пустые
         if str(value[0]) == "nan" or str(value[1]) == "nan":
             logger.critical(
                 f"Found an empty address or value. This should never happen."
             )
             continue
+
+        # если адрес = паттерн
         if (str(value[0]).lower()) == "pattern":
             logger.info(f"Patching pattern {value[2]} => {value[1]}")
             index = lib.find(bytes.fromhex(value[2]))
@@ -165,6 +168,7 @@ if __name__ == "__main__":
                 index = lib.find(bytes.fromhex(value[2]))
             lib.seek(0)
             continue
+
         logger.debug(f"Patching address = {value[0]}, value = {value[1]}")
         try:
             lib.seek(int(value[0], 16), 0)
@@ -180,8 +184,9 @@ if __name__ == "__main__":
         f" {dt_string}\n"
     )
 
-    # удаляет паттерны из ченджлога
-    changed_values = changed_values[~changed_values["Address"].str.contains("PATTERN")]
+    # чистит ченджлог от паттернов
+    changed_values.loc[changed_values['Address'] == "PATTERN", "Extracted Value"] = ""
+    changed_values.loc[changed_values['Address'] == "PATTERN", "Value override"] = ""
 
     # копируем весь датафрейм в файл ченджлога
     changelog.write(
