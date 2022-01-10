@@ -84,7 +84,7 @@ if __name__ == "__main__":
             set(empty_rows)
         )  # сортировка и удаление дубликатов индексов
         logger.error(
-            f"Found {empty_error_columns} empty spreadsheet value(s) with ID"
+            f"Found {empty_error_columns} empty spreadsheet value(s) with IDs"
             f" {empty_rows} in {error_columns} columns. These rows will be ignored during patching."
         )
         # exit()
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
         # если адрес = паттерн
         if (str(value[0]).lower()) == "pattern":
-            logger.info(f"[{value[3]}] Patching pattern {value[2]} => {value[1]}")
+            logger.info(f"[ID {value[3]}] Patching pattern {value[2]} => {value[1]}")
             index = lib.find(bytes.fromhex(value[2]))
             while index != -1:
                 rampatcher_string = (
@@ -174,7 +174,9 @@ if __name__ == "__main__":
             lib.seek(0)
             continue
 
-        logger.debug(f"[{value[3]}] Patching address = {value[0]}, value = {value[1]}")
+        logger.debug(
+            f"[ID {value[3]}] Patching address = {value[0]}, value = {value[1]}"
+        )
         try:
             lib.seek(int(value[0], 16), 0)
             lib.write(bytes.fromhex(value[1]))
