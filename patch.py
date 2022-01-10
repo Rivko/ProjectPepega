@@ -41,7 +41,6 @@ if __name__ == "__main__":
         logger.info(f"Trying to access {full_url}")
         tablichka = pd.read_csv(
             full_url,
-            index_col=0,
             usecols=config.COLUMN_NAMES,
             dtype={"Name": "str", "Value override": "str", "Extracted Value": "str"},
         )
@@ -108,6 +107,7 @@ if __name__ == "__main__":
             changed_values["Address"],
             changed_values["Value Override Converted to HEX"],
             changed_values["Value hex original"],
+            changed_values["ID"],
         )
     )
 
@@ -147,6 +147,7 @@ if __name__ == "__main__":
     logger.success(f"Loaded lib file {NEW_LIB_NAME}.so")
     logger.info(f"Patching {len(values_to_patch)} values")
 
+    rampatcher_string = ""
     # патчим все выбранные значения
     for value in values_to_patch:
 
@@ -159,9 +160,13 @@ if __name__ == "__main__":
 
         # если адрес = паттерн
         if (str(value[0]).lower()) == "pattern":
-            logger.info(f"Patching pattern {value[2]} => {value[1]}")
+            logger.info(f"[{value[3]}] Patching pattern {value[2]} => {value[1]}")
             index = lib.find(bytes.fromhex(value[2]))
             while index != -1:
+                rampatcher_string = (
+                    rampatcher_string
+                    + f"ID{value[3]};0x{hex(index).upper().replace('X', '0')}={value[1]},"
+                )
                 logger.debug(f"Found at {hex(index).upper().replace('X', '0')}")
                 lib.seek(index, 0)
                 lib.write(bytes.fromhex(value[1]))
@@ -169,10 +174,13 @@ if __name__ == "__main__":
             lib.seek(0)
             continue
 
-        logger.debug(f"Patching address = {value[0]}, value = {value[1]}")
+        logger.debug(f"[{value[3]}] Patching address = {value[0]}, value = {value[1]}")
         try:
             lib.seek(int(value[0], 16), 0)
             lib.write(bytes.fromhex(value[1]))
+            rampatcher_string = (
+                rampatcher_string + f"ID{value[3]};0x{value[0]}={value[1]},"
+            )
         except ValueError as e:
             logger.error(f"Address {value[0]} is out of range.")
             exit()
@@ -185,8 +193,8 @@ if __name__ == "__main__":
     )
 
     # чистит ченджлог от паттернов
-    changed_values.loc[changed_values['Address'] == "PATTERN", "Extracted Value"] = ""
-    changed_values.loc[changed_values['Address'] == "PATTERN", "Value override"] = ""
+    changed_values.loc[changed_values["Address"] == "PATTERN", "Extracted Value"] = ""
+    changed_values.loc[changed_values["Address"] == "PATTERN", "Value override"] = ""
 
     # копируем весь датафрейм в файл ченджлога
     changelog.write(
@@ -196,6 +204,9 @@ if __name__ == "__main__":
             columns=["Name", "Extracted Value", "Value override"],
         )
     )
+
+    # вывод строки рампатчера с удалением последней лишней запятой
+    changelog.write("\n\nRampatcher string:\n" + rampatcher_string[:-1])
 
     # ченджлог записывается в файл с таким же названием как и либа
     with open("patched/" + NEW_LIB_NAME + ".txt", "w", encoding="utf-8") as f:
