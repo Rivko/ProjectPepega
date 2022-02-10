@@ -60,7 +60,6 @@ if __name__ == "__main__":
         "Name",
         "Type",
         "Disassemble",
-        "Extracted Value",
     ]
     empty_warning_columns = tablichka[warning_columns].isnull().values.any()
     if empty_warning_columns:
@@ -175,7 +174,7 @@ if __name__ == "__main__":
             continue
 
         logger.debug(
-            f"[ID {value[3]}] Patching address = {value[0]}, value = {value[1]}"
+            f"[ID {int(value[3])}] Patching address = {value[0]}, value = {value[1]}"
         )
         try:
             lib.seek(int(value[0], 16), 0)

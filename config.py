@@ -1,10 +1,10 @@
 HBK_NAME = "8.4.300_rc15.hbk"
-LIB_TO_EXTRACT = "8.4.300_rc15.so"
+LIB_TO_EXTRACT = "8.4.400_rc19.so"
 
 
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1fsHrLENfCP2rzbNNWNgxPjFhEjIno0J2jTKW3fLIvU8"  # MUST BE OPEN TO PUBLIC
-SHEET_NAME = "8.4.300_RC15_RC18"  # NO SPACES
-LIB_TO_PATCH = "8.4.300_rc15.so"
+SHEET_NAME = "8.4"  # NO SPACES
+LIB_TO_PATCH = "8.4.400_rc19.so"
 
 COLUMN_NAMES = [
     "ID",
