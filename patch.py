@@ -180,7 +180,7 @@ if __name__ == "__main__":
             lib.seek(int(value[0], 16), 0)
             lib.write(bytes.fromhex(value[1]))
             rampatcher_string = (
-                rampatcher_string + f"ID{value[3]};0x{value[0]}={value[1]},"
+                rampatcher_string + f"ID{int(value[3])};0x{value[0]}={value[1]},"
             )
         except ValueError as e:
             logger.error(f"Address {value[0]} is out of range.")
