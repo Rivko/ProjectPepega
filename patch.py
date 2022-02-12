@@ -159,12 +159,12 @@ if __name__ == "__main__":
 
         # если адрес = паттерн
         if (str(value[0]).lower()) == "pattern":
-            logger.info(f"[ID {value[3]}] Patching pattern {value[2]} => {value[1]}")
+            logger.info(f"[ID {int(value[3])}] Patching pattern {value[2]} => {value[1]}")
             index = lib.find(bytes.fromhex(value[2]))
             while index != -1:
                 rampatcher_string = (
                     rampatcher_string
-                    + f"ID{value[3]};0x{hex(index).upper().replace('X', '0')}={value[1]},"
+                    + f"ID{int(value[3])};0x{hex(index).upper().replace('X', '0')}={value[1]},"
                 )
                 logger.debug(f"Found at {hex(index).upper().replace('X', '0')}")
                 lib.seek(index, 0)
